@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "1cc06490-7e54-49fe-beba-c6511ec3dd16",
     "name": "Overnew API",
-    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "description": "Overnew API 자동화 테스트 컬렉션\n\n- 대상: account, feed, recommend API\n    \n- 케이스: 정상 / 입력 오류 / 비로그인 접근 제어 / 응답 구조·타입 검증\n    \n- 실행: Newman CLI, GitHub Actions(push 시 자동 실행)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "58810402",
     "_collection_link": "https://go.postman.co/collection/58810402-1cc06490-7e54-49fe-beba-c6511ec3dd16?source=collection_link"
@@ -72,6 +72,111 @@
                 "api",
                 "hot",
                 ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Hot feed - topic 필터(경제)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"경제 기사가 1개 이상\", function () {\r\n    pm.expect(pm.response.json().articles.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"모든 기사의 카테고리가 경제\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a.category).to.eql(\"경제\");\r\n    });\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/hot/?topic=economy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "hot",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "topic",
+                  "value": "economy"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Hot feed - 조회수 내림차순·최대 20개",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"최대 20개\", function () {\r\n    pm.expect(pm.response.json().articles.length).to.be.at.most(20);\r\n});\r\n\r\npm.test(\"조회수가 내림차순(같으면 허용)\", function () {\r\n    const views = pm.response.json().articles.map(function (a) { return a.views; });\r\n    for (let i = 1; i < views.length; i++) {\r\n        pm.expect(views[i]).to.be.at.most(views[i - 1]);\r\n    }\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/hot/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "hot",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Hot feed - 알 수 없는 topic은 필터 무시",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"알 수 없는 topic도 200 (404가 아님)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"필터 없이 기사가 반환됨\", function () {\r\n    pm.expect(pm.response.json().articles.length).to.be.above(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/hot/?topic=no_such_topic",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "hot",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "topic",
+                  "value": "no_such_topic"
+                }
               ]
             }
           },
@@ -224,6 +329,40 @@
                 "account",
                 "profile",
                 "edit",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Following feed - 비로그인 접근(302)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"비로그인은 로그인 페이지로 리다이렉트(302)\", function () {\r\n    pm.response.to.have.status(302);\r\n});\r\n\r\npm.test(\"이동 주소가 로그인 페이지\", function () {\r\n    pm.expect(pm.response.headers.get(\"Location\")).to.include(\"/account/login/\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/following/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "following",
                 ""
               ]
             }
@@ -566,6 +705,74 @@
                 "notifications",
                 "unread-count",
                 ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Following feed - 로그인(팔로우한 유저의 스크랩)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"requires_login이 false\", function () {\r\n    pm.expect(pm.response.json().requires_login).to.eql(false);\r\n});\r\n\r\npm.test(\"results에 1개 이상(팔로우한 유저의 스크랩)\", function () {\r\n    pm.expect(pm.response.json().results.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"results 항목의 구조\", function () {\r\n    pm.response.json().results.forEach(function (r) {\r\n        pm.expect(r.user).to.include.all.keys(\"id\", \"nickname\");\r\n        pm.expect(r.user.nickname).to.be.a(\"string\").and.not.empty;\r\n        pm.expect(r.article).to.include.all.keys(\r\n            \"id\", \"category\", \"source\", \"title\", \"views\", \"time\", \"image\"\r\n        );\r\n    });\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/following/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "following",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Following feed - topic 필터(정치는 비어 있음)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"팔로우한 유저가 정치 기사를 스크랩하지 않았으면 빈 목록\", function () {\r\n    pm.response.to.have.status(200);\r\n    pm.expect(pm.response.json().results).to.be.an(\"array\").that.is.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/following/?topic=politics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "following",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "topic",
+                  "value": "politics"
+                }
               ]
             }
           },
