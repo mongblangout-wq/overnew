@@ -180,3 +180,52 @@ class RecommendUserView(View):
 
 def recommend_main(request):
     return render(request, 'recommend/main.html')
+
+CODE_TO_CATEGORY_NAME = {
+    'politics': '정치', 'economy': '경제', 'society': '사회', 'culture': '생활/문화',
+    'it': 'IT/과학', 'world': '세계',
+    'entertainment': '연예', 'enter': '연예',
+    'sports': '스포츠', 'sport': '스포츠',
+}
+ALL_CATEGORY_NAMES = ['정치', '경제', '사회', '생활/문화', 'IT/과학', '세계', '연예', '스포츠']
+
+
+def recommend_article_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"requires_login": True, "articles": []})
+
+    rec_type = request.GET.get('type', 'similar')
+
+    selected_codes = AccountUserNews.objects.filter(
+        user=request.user
+    ).values_list('category__code', flat=True)
+    selected_names = {CODE_TO_CATEGORY_NAME[c] for c in selected_codes if c in CODE_TO_CATEGORY_NAME}
+
+    if rec_type == 'opposite':
+        target_names = [n for n in ALL_CATEGORY_NAMES if n not in selected_names]
+    else:
+        target_names = list(selected_names)
+
+    if not target_names:
+        return JsonResponse({"requires_login": False, "articles": []})
+
+    qs = (
+        Article.objects
+        .select_related('media', 'nc')
+        .annotate(like_count=Count('likes'))
+        .filter(nc__news_category__in=target_names)
+        .order_by('-created_at')[:30]
+    )
+
+    articles = [{
+        "id": a.article_id,
+        "category": a.nc.news_category if a.nc else "",
+        "source": a.media.name if a.media else "",
+        "title": a.title,
+        "likes": a.like_count,
+        "views": a.view_count,
+        "time": a.created_at.strftime('%Y-%m-%d %H:%M'),
+        "image": a.image or "",
+    } for a in qs]
+
+    return JsonResponse({"requires_login": False, "articles": articles})

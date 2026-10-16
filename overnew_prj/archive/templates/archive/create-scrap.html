@@ -1,14 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>기사 스크랩 - OVERNEW</title>
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body class="with-fixed-nav">
+    <script type="application/json" id="user-data-json">{"id": {{ current_user_id }}}</script>
     <header class="main-header">
         <!-- 뒤로가기 버튼 -->
         <button type="button" class="icon-btn menu-btn" id="back-button">
@@ -26,7 +27,7 @@
             스크랩하는 기사의 분야와 언론사 및<br>해당 기사의 링크를 작성해주세요.
         </h3>
 
-        <div class="topic-grid">
+        <div class="topic-grid" id="topic-grid">
             <button type="button" class="topic-grid-button" data-topic="politics">정치</button>
             <button type="button" class="topic-grid-button" data-topic="economy">경제</button>
             <button type="button" class="topic-grid-button" data-topic="society">사회</button>
@@ -51,4 +52,6 @@
 
     <button type="button" class="next-button" id="submit-scrap-btn">기사 스크랩하기</button>
 
-    <script src="../../../static/js/archive.js"></script>
+    <script src="{% static 'js/archive.js' %}"></script>
+</body>
+</html>

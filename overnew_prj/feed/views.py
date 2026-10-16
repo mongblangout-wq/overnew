@@ -1,11 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-
-from archive.models import *
-from users.models import *
-
 from django.http import JsonResponse
+
+from archive.models import Article, Scrap
+from archive.models import Article, Scrap, Follow
 
 
 def feed(request):
@@ -15,7 +14,7 @@ def feed(request):
         .order_by('-created_at')
     )
     return render(request, 'feed/feed.html', {
-        'mode': 'all',       # 탭 표시용
+        'mode': 'all',
         'articles': articles,
     })
 
@@ -31,6 +30,20 @@ TOPIC_TO_CATEGORY_NAME = {
     'sport': '스포츠',
 }
 
+
+def _serialize_article(a):
+    return {
+        "id": a.article_id,
+        "category": a.nc.news_category if a.nc else "",
+        "source": a.media.name if a.media else "",
+        "title": a.title,
+        "views": a.view_count,
+        "likes": getattr(a, 'like_count', 0),
+        "time": a.created_at.strftime('%Y-%m-%d %H:%M'),
+        "image": a.image or "",
+    }
+
+
 def hot_feed_api(request):
     topic = request.GET.get('topic')
 
@@ -38,8 +51,7 @@ def hot_feed_api(request):
         Article.objects
         .select_related('media', 'nc')
         .annotate(like_count=Count('likes'))
-        .filter(view_count__gte=500)  
-        .order_by('-like_count', '-created_at')
+        .order_by('-view_count', '-like_count', '-created_at')
     )
 
     if topic:
@@ -48,36 +60,18 @@ def hot_feed_api(request):
             qs = qs.filter(nc__news_category=category_name)
 
     qs = qs[:20]
+    return JsonResponse({"articles": [_serialize_article(a) for a in qs]})
 
-    articles = []
-    for a in qs:
-        articles.append({
-            "id": a.article_id,
-            "category": a.nc.news_category if a.nc else "",
-            "source": a.media.media_name if a.media else "",
-            "title": a.title,
-            "views": a.view_count,
-            "time": a.created_at.strftime('%Y-%m-%d %H:%M'),
-            "image": a.image or "https://via.placeholder.com/100x60",
-        })
 
-    return JsonResponse({"articles": articles})
 
 @login_required
 def following_feed_api(request):
     topic = request.GET.get('topic')
     category_name = TOPIC_TO_CATEGORY_NAME.get(topic)
 
-    # 🔹 비로그인: 200 OK + requires_login 플래그
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            "requires_login": True,
-            "results": []
-        })
-
-    following_ids = Following.objects.filter(
-        user=request.user
-    ).values_list('user2_id', flat=True)
+    following_ids = Follow.objects.filter(
+        follower=request.user
+    ).values_list('following_id', flat=True)
 
     scraps = (
         Scrap.objects
@@ -94,23 +88,16 @@ def following_feed_api(request):
         u = s.user
         a = s.news
         results.append({
-            "user": {
-                "id": u.id,
-                "nickname": u.nickname or u.username,
-                "profile_image": u.profile_image.url if u.profile_image else "",
-            },
+            "user": {"id": u.id, "nickname": u.nickname or u.username},
             "article": {
                 "id": a.article_id,
                 "category": a.nc.news_category if a.nc else "",
-                "source": a.media.media_name if a.media else "",
+                "source": a.media.name if a.media else "",
                 "title": a.title,
                 "views": a.view_count,
                 "time": a.created_at.strftime('%Y-%m-%d %H:%M'),
-                "image": a.image or "https://via.placeholder.com/100x60",
+                "image": a.image or "",
             }
         })
 
-    return JsonResponse({
-        "requires_login": False,
-        "results": results
-    })
+    return JsonResponse({"requires_login": False, "results": results})

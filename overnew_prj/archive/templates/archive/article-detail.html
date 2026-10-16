@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -5,31 +6,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>기사 상세 - OVERNEW</title>
-
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body class="with-fixed-nav">
 
     <header class="main-header">
-        <a href="../../../account/templates/account/settings-logged-in.html" class="icon-btn menu-btn">
-            <img src="../../../static/image/hamburger.png" alt="메뉴" class="header-icon">
-        </a>
+        <button type="button" class="icon-btn back-btn" id="back-button" aria-label="뒤로가기">
+            <span class="back-arrow">&larr;</span>
+        </button>
         <h1 class="logo header-logo">OVERNEW</h1>
-        <a href="../../../account/templates/account/notifications.html" class="icon-btn bell-btn">
-            <img src="../../../static/image/bell.png" alt="알림" class="header-icon">
+        <a href="/account/notifications/" class="icon-btn bell-btn" id="notifications-btn">
+            <img src="{% static 'image/bell.png' %}" alt="알림" class="header-icon">
         </a>
     </header>
 
+    <!-- 🌟 순서 변경: 좋아요 → 북마크 → 토론방 선택 -->
     <aside class="floating-action-bar">
-        <button type="button" class="action-btn" id="like-btn">
-            <img src="../../../static/image/like.png" alt="좋아요" class="action-icon">
+        <button type="button"
+                class="action-btn {% if is_liked %}active{% endif %}"
+                id="like-btn"
+                data-article-id="{{ article.article_id }}"
+                data-liked="{{ is_liked|yesno:'true,false' }}">
+            <img src="{% static 'image/like.png' %}" alt="좋아요" class="action-icon">
         </button>
-        <button type="button" class="action-btn" id="discuss-btn">
-            <img src="../../../static/image/comment_icon.png" alt="댓글 달기" class="action-icon">
+        <button type="button"
+                class="action-btn {% if is_bookmarked %}active{% endif %}"
+                id="bookmark-btn"
+                data-article-id="{{ article.article_id }}"
+                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+            <img src="{% static 'image/bookmark-white.png' %}" alt="북마크" class="action-icon">
         </button>
-        <button type="button" class="action-btn" id="bookmark-btn">
-            <img src="../../../static/image/bookmark-white.png" alt="북마크" class="action-icon">
+        <button type="button"
+                class="action-btn"
+                id="discuss-btn"
+                data-article-id="{{ article.article_id }}">
+            <img src="{% static 'image/comment_icon.png' %}" alt="토론방" class="action-icon">
         </button>
     </aside>
 
@@ -38,38 +50,34 @@
         <article class="article-content">
 
             <h1 class="article-title">
-                강아지 놀이터에서 헤어진 강아지가 다시 만날 확률은... '첫눈에 알아봤댕!'
+                {{ article.title }}
             </h1>
 
             <div class="article-meta">
-                <span>작성일: 2025.10.20 18:48:02</span>
-                <span>수정일: 2025.11.09 09:48:15</span>
-                <span>김기자: papercut@inbnat.co.kr</span>
+                <span>작성일: {{ article.created_at|date:"Y.m.d H:i" }}</span>
+                {% if article.media %}<span>{{ article.media.name }}</span>{% endif %}
+                {% if article.nc %}<span>{{ article.nc.news_category }}</span>{% endif %}
             </div>
 
+            {% if article.image %}
             <figure class="article-figure">
-                <img src="dog-meeting-image.jpg" alt="다시 만난 강아지들" class="article-image">
-                <figcaption class="article-caption">
-                    파크...발견한 남매가...우연히 만나서(왼쪽 사진), 서로를 바로 알아보고 반가워했다.
-                </figcaption>
+                <img src="{{ article.image }}" alt="{{ article.title }}" class="article-image">
             </figure>
+            {% endif %}
 
             <div class="article-body">
-                <p>[노트펫] 중증보호소에서 헤어진 강아지 남매가 다시 만날 확률은 얼마나 될까?</p>
-                <p>보호소에서 다른 무리들에게 각각 입양된 강아지 남매가...서로를 알아봤다고 미국 시사주간지 뉴스위크가 전했다.</p>
-                <p>동희니 송이 지난 2020년 틱톡에 올린 동영상이...화제가 됐다. 이 영상은 28만건 넘는 '좋아요'를 받았다.</p>
+                {% if article.summary %}<p>{{ article.summary }}</p>{% endif %}
+                {% if article.news_content %}<p>{{ article.news_content }}</p>{% endif %}
             </div>
 
-            <div class="article-embedded-content">
-                <img src="dog-tiktok-image.jpg" alt="TikTok video embed">
-            </div>
+            <a href="{{ article.url }}" target="_blank" class="article-original-link">원문 기사 보러가기 →</a>
 
         </article>
 
     </main>
 
     <nav class="bottom-nav">
-        <a href="{% url 'feed' %}" class="nav-item active">
+        <a href="{% url 'feed:feed' %}" class="nav-item active">
             <div class="nav-icon-wrapper"><span class="nav-icon">◆</span></div>
             <span class="nav-label">피드</span>
         </a>
@@ -87,7 +95,7 @@
         </a>
     </nav>
     <!-- JS 파일 불러오기 -->
-    <script src="../../../static/js/article.js"></script>
+    <script src="{% static 'js/article.js' %}"></script>
 
 </body>
 

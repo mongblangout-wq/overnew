@@ -1,3 +1,18 @@
-from django.shortcuts import render
+#overnew_prj/overnew_prj/urls.py
 
-# Create your views here.
+from django.contrib import admin
+from django.urls import path, include
+from django.shortcuts import redirect
+
+def root_redirect(request):
+    return redirect('account:splash')
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("account/", include("account.urls")),
+    path("archive/", include("archive.urls")),
+    path("recommend/", include("recommend.urls")),
+    path("discussion/", include("discussion.urls")),
+    path("", root_redirect, name="root"),
+    path("feed/", include("feed.urls")),
+]

@@ -88,3 +88,37 @@ class UserMedia(models.Model):
     class Meta:
         db_table = "user_media"
         unique_together = ("user", "media")
+
+class Notification(models.Model):
+    """알림 (팔로우 / 내 댓글에 답글 / 내 댓글 좋아요)"""
+    TYPE_FOLLOW = "follow"
+    TYPE_REPLY = "reply"
+    TYPE_COMMENT_LIKE = "comment_like"
+    TYPE_CHOICES = [
+        (TYPE_FOLLOW, "팔로우"),
+        (TYPE_REPLY, "답글"),
+        (TYPE_COMMENT_LIKE, "댓글 좋아요"),
+    ]
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
+    )
+    # 익명방 알림은 누가 했는지 숨기기 위해 actor를 비워서 저장함
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="sent_notifications"
+    )
+    notif_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    text = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, blank=True)      # 클릭 시 이동할 경로
+    target_id = models.PositiveIntegerField(null=True, blank=True)  # 댓글 id 등 (중복 알림 방지용)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "notification"
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["recipient", "is_read"])]
+
+    def __str__(self):
+        return f"[{self.notif_type}] -> {self.recipient} : {self.text}"

@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토론방 - OVERNEW</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="with-fixed-nav with-fixed-comment-bar" data-room-type="{{ room.room_type }}">
+<header class="main-header">
+    <button type="button" class="icon-btn menu-btn" onclick="history.back()"><span>&lt;</span></button>
+    <h1 class="logo header-logo">OVERNEW</h1>
+    <div style="width:40px;"></div>
+</header>
+
+<main class="container">
+    <div class="discussion-article-header">
+        <a href="/archive/article/{{ article.article_id }}/" class="article-title-link">
+            <h2 class="article-title">{{ article.title }}</h2>
+        </a>
+        <div class="discussion-meta">
+            <div class="meta-left">
+                {% if room.time_left %}
+                <span class="time-left">{{ room.time_left }} hours left</span>
+                {% else %}
+                <span class="time-left">토론 종료</span>
+                {% endif %}
+                <span class="participant-count">{{ participant_count }}명이 토론에 참여중</span>
+            </div>
+        </div>
+    </div>
+
+        <div class="comment-list" id="comment-list">
+        {% for comment in top_comments %}
+        <div class="comment-item" data-comment-id="{{ comment.id }}">
+            {% if room.room_type == "anonymous" %}
+            <div class="comment-avatar anonymous-placeholder"></div>
+            {% else %}
+            <a href="{% url 'archive:profile_detail' comment.user.id %}">
+                <div class="comment-avatar"></div>
+            </a>
+            {% endif %}
+            <div class="comment-content">
+                <div class="comment-header">
+                    {% if room.room_type == "anonymous" %}
+                    <span class="comment-user">
+                        {% if comment.anon_display %}익명{{ comment.anon_display }}{% else %}익명{% endif %}
+                    </span>
+                    {% else %}
+                    <a href="{% url 'archive:profile_detail' comment.user.id %}" class="comment-user-link">
+                        <span class="comment-user">{{ comment.user.nickname }}</span>
+                    </a>
+                    {% endif %}
+                    <span class="comment-date">{{ comment.created_at|date:"Y-m-d" }}</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+                <div class="comment-actions">
+                    <button type="button" class="action-btn like-btn" data-comment-id="{{ comment.id }}">
+                        <span>♥</span>{{ comment.comment_likes.count }}
+                    </button>
+                    <button type="button" class="action-btn reply-btn" data-comment-id="{{ comment.id }}">답글</button>
+                </div>
+
+                <div class="reply-list" data-parent-id="{{ comment.id }}">
+                    {% for reply in comment.replies.all %}
+                    <div class="comment-item" data-comment-id="{{ reply.id }}">
+                        {% if room.room_type == "anonymous" %}
+                        <div class="comment-avatar anonymous-placeholder"></div>
+                        {% else %}
+                        <a href="{% url 'archive:profile_detail' reply.user.id %}">
+                            <div class="comment-avatar"></div>
+                        </a>
+                        {% endif %}
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                {% if room.room_type == "anonymous" %}
+                                <span class="comment-user">
+                                    {% if reply.anon_display %}익명{{ reply.anon_display }}{% else %}익명{% endif %}
+                                </span>
+                                {% else %}
+                                <a href="{% url 'archive:profile_detail' reply.user.id %}" class="comment-user-link">
+                                    <span class="comment-user">{{ reply.user.nickname }}</span>
+                                </a>
+                                {% endif %}
+                                <span class="comment-date">{{ reply.created_at|date:"Y-m-d" }}</span>
+                            </div>
+                            <p class="comment-text">{{ reply.content }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-comment-message">아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</p>
+        {% endfor %}
+    </div>
+</main>
+
+<form class="comment-input-bar" id="comment-form" method="post"
+      action="{% url 'discussion:create_comment' article.article_id room.room_type %}">
+    {% csrf_token %}
+    <input type="hidden" name="parent_id" id="parent-id-input" value="">
+    <div class="card-avatar-small"></div>
+    <input type="text" name="content" placeholder="Add a comment" required>
+    <button type="button" id="cancel-reply-btn" class="cancel-reply-btn" style="display:none;">✕</button>
+    <button type="submit" class="comment-submit-btn">업로드</button>
+</form>
+
+<nav class="bottom-nav">
+    <a href="{% url 'feed:feed' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">◆</span></div>
+        <span class="nav-label">피드</span>
+    </a>
+    <a href="{% url 'archive:home' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">●</span></div>
+        <span class="nav-label">아카이브</span>
+    </a>
+    <a href="{% url 'recommend:main' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">▲</span></div>
+        <span class="nav-label">추천</span>
+    </a>
+    <a href="{% url 'discussion:community' %}" class="nav-item active">
+        <div class="nav-icon-wrapper"><span class="nav-icon">◐</span></div>
+        <span class="nav-label">커뮤니티</span>
+    </a>
+</nav>
+<script src="{% static 'js/discussion.js' %}"></script>
+</body>
+</html>

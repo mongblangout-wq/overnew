@@ -30,9 +30,7 @@
             사용하실 닉네임과<br>계정 정보를 입력해 주세요.
         </h3>
 
-        <form class="info-form" method="POST" action="{% url 'account:info_step5_post' %}">
-
-            {% csrf_token %}
+        <div class="info-form">
 
             <div class="form-group">
                 <label for="nickname">닉네임</label>
@@ -54,11 +52,11 @@
                 <input type="password" id="confirm-password" placeholder="Value">
             </div>
 
-        </form>
+            <button type="button" class="next-button" id="next-btn-step5">NEXT</button>
+
+        </div>
 
     </main>
-
-    <button type="submit" class="next-button" id="next-btn-step5">NEXT</button>
 
 </body>
 

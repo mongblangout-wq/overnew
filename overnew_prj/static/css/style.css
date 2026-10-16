@@ -673,6 +673,12 @@ body.with-fixed-nav {
     text-align: center;
     text-decoration: none;
 }
+/* 🌟 헤더 아이콘(햄버거/알림/뒤로가기 등) 크기 통일 - 피드 탭 기준 26px */
+.header-icon {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+}
 .header-logo {
     /* 기존 .logo 스타일을 상속받되, 헤더에 맞게 크기/여백 조절 */
     font-size: 28px !important;
@@ -680,22 +686,26 @@ body.with-fixed-nav {
 }
 
 /* 2. 하단 내비게이션 바 */
+:root {
+    --bottom-nav-height: 64px;
+}
+
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
+    height: var(--bottom-nav-height);
 
     display: flex;
     justify-content: space-around; /* 4개 항목 균등 배치 */
-    
-    /* (수정) 피그마처럼 흰색 배경이 아닌 연한 배경색 사용 */
+
     background-color: #F9F4E7;
-    /* (수정) 위쪽으로 그림자 */
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); 
-    
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+
     padding: 8px 0;
-    padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 대응 */
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* 아이폰 하단 대응 */
+    box-sizing: border-box;
     z-index: 100;
 }
 .nav-item {
@@ -809,7 +819,7 @@ body.with-fixed-nav {
 /* ----- 13. (수정) 추천 탭 (main.html) 스타일 ----- */
 /* (기존 .feed-card 스타일을 .user-feed-group 내부로 이동) */
 
-/* 1. (NEW) 사용자 그룹 컨테이너 (예: '왼가비' 그룹) */
+/* 1. (NEW) 사용자 그룹 컨테이너 */
 .user-feed-group {
     background-color: #FFFFFF; /* 카드 흰색 배경 */
     border-radius: 16px;
@@ -961,6 +971,11 @@ body.with-fixed-nav {
     color: #222;
     margin-bottom: 15px;
 }
+.article-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
 .article-meta {
     display: flex;
     flex-direction: column; /* 정보 세로로 나열 */
@@ -1006,31 +1021,39 @@ body.with-fixed-nav {
 .article-list {
     display: flex;
     flex-direction: column !important;
-    gap: 12px; /* 카드 사이 간격 */
+    gap: 20px; /* 그대로 둠 (HOT 탭 간격) */
 }
+
+/*#feed-following {*/
+/*    gap: 6px; !* FOLLOWING 탭만 좁게 *!*/
+/*}*/
 
 /* 피드 페이지의 기사 카드 (a 태그) */
 .article-card {
     display: flex;
-    background-color: #FFFFFF; /* 카드 흰색 배경 */
+    align-items: center;   /* ← 이 줄 추가 */
+    background-color: #FFFFFF;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 16px;
-    text-decoration: none; /* 링크 밑줄 제거 */
+    text-decoration: none;
     color: #333;
-    gap: 15px; /* 텍스트와 썸네일 사이 간격 */
+    gap: 15px;
 }
 
-/* 마지막 카드의 하단 여백 (하단 바에 가려지지 않게) */
-.article-card:last-child {
-    margin-bottom: 20px; 
+/* 마지막 카드의 하단 여백 (하단 바에 가려지지 않게) - 컨테이너 쪽으로 이동 */
+#feed-hot,
+#feed-following {
+    padding-bottom: 20px;
 }
 
 /* 카드 좌측 텍스트 영역 */
 .card-text {
-    flex: 1; /* 텍스트 영역이 남는 공간 다 차지 */
+    flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    gap: 6px;
 }
 
 /* 카드 카테고리 태그 (IT/과학, 경제...) */
@@ -1052,18 +1075,13 @@ body.with-fixed-nav {
 .card-source {
     font-size: 12px;
     color: #888;
-    margin-top: 5px; /* 카테고리 태그와의 간격 */
 }
 
 .card-title {
     font-size: 16px;
     font-weight: 600;
     color: #222;
-    margin: 8px 0;
     line-height: 1.4;
-    
-    /* 텍스트가 텍스트 영역을 벗어나지 않도록 */
-    flex-grow: 1; /* 제목이 남은 공간을 채움 */
 }
 
 /* 조회수, 시간 */
@@ -1073,7 +1091,6 @@ body.with-fixed-nav {
     font-size: 12px;
     color: #888;
     align-items: center;
-    margin-top: auto; /* 맨 아래로 밀어내기 */
 }
 
 /* 카드 우측 썸네일 이미지 */
@@ -1089,8 +1106,7 @@ body.with-fixed-nav {
 
 /* '...님이 열람한 기사입니다' 헤더 그룹 */
 .following-card-group {
-    /* 각 카드 그룹 사이의 간격 */
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .follower-header {
@@ -1116,12 +1132,18 @@ body.with-fixed-nav {
     margin-right: 4px;
 }
 
-/* 'FOLLOWING' 탭의 기사 카드는 기존 .article-card 스타일을 
+/* 'FOLLOWING' 탭의 기사 카드는 기존 .article-card 스타일을
    재사용하므로, 추가 스타일이 거의 필요 없습니다. */
 
 /* (수정) topic-politics 색상 추가 */
 .topic-politics { background-color: #4A148C; } /* 정치 (진한 보라) */
 .topic-default { background-color: #555; } /* 기본 (회색) */
+
+/* 🌟 나머지 카테고리 색상 추가 */
+.topic-culture { background-color: #AD1457; } /* 생활/문화 (자주색) */
+.topic-world { background-color: #00838F; } /* 세계 (청록) */
+.topic-enter { background-color: #F57F17; } /* 연예 (황색) */
+.topic-sport { background-color: #2E7D32; } /* 스포츠 (녹색) */
 
 /* ----- 17. (추가) 아카이브 페이지 스타일 ----- */
 
@@ -1186,23 +1208,23 @@ body.with-fixed-nav {
     /* (수정) 하단 네비게이션 바 바로 위에 */
     bottom: 90px; /* (조절 필요) 70px(하단바) + 20px(여백) */
     right: 20px;
-    
+
     width: 56px;
     height: 56px;
     background-color: #620B95; /* 포인트 보라색 */
     color: #FFFFFF; /* 흰색 아이콘 */
-    
+
     border-radius: 50%; /* 원형 */
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25); /* 진한 그림자 */
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     text-decoration: none;
     font-size: 28px; /* 아이콘 크기 */
     font-weight: bold;
-    
+
     z-index: 90; /* 헤더(100)보단 낮고, 콘텐츠보단 높게 */
     transition: transform 0.2s ease;
 }
@@ -1210,11 +1232,12 @@ body.with-fixed-nav {
     transform: scale(0.95); /* 클릭 시 살짝 작아짐 */
 }
 
-/* (수정) article-list의 마지막 카드 하단 여백 
+/* (수정) article-list의 마지막 카드 하단 여백
    (FAB에 가려지지 않게 넉넉하게)
 */
-.article-list .article-card:last-child {
-    margin-bottom: 40px; 
+#feed-hot,
+#feed-following {
+    padding-bottom: 20px;
 }
 
 /* ----- 18. (추가) 기사 스크랩 페이지 스타일 ----- */
@@ -1231,15 +1254,15 @@ body.with-fixed-nav {
     text-align: center;
     font-size: 15px;
     font-weight: 600;
-    
+
     /* (기본) '000000 7%' (연한 회색) 배경 */
-    background-color: rgba(0, 0, 0, 0.07); 
+    background-color: rgba(0, 0, 0, 0.07);
     color: #AAAAAA; /* 선택 안 된 글자색 */
-    
+
     border: none;
     border-radius: 50px; /* 둥근 알약 모양 */
     cursor: pointer;
-    transition: all 0.2s ease-in-out; 
+    transition: all 0.2s ease-in-out;
 }
 /* (핵심) 선택된 토픽 버튼 스타일 */
 .topic-grid-button.active {
@@ -1259,11 +1282,11 @@ body.with-fixed-nav {
     padding: 16px;
     border: none;
     border-radius: 12px;
-    background-color: rgba(0, 0, 0, 0.07); 
-    color: #222222; 
+    background-color: rgba(0, 0, 0, 0.07);
+    color: #222222;
     font-size: 16px;
     font-weight: 500;
-    
+
     /* (수정) x 버튼이 겹치지 않게 오른쪽 여백 확보 */
     padding-right: 45px !important;
 }
@@ -1274,19 +1297,19 @@ body.with-fixed-nav {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    
+
     background: #AAAAAA; /* 회색 배경 */
     color: #FFFFFF; /* 흰색 'x' */
-    
+
     border: none;
     border-radius: 50%;
     width: 24px;
     height: 24px;
-    
+
     font-size: 16px;
     font-weight: bold;
     line-height: 24px; /* 'x' 중앙 정렬 */
-    
+
     cursor: pointer;
     opacity: 0.7;
 }
@@ -1294,8 +1317,8 @@ body.with-fixed-nav {
     opacity: 1;
 }
 
-/* 3. "기사 스크랩하기" 버튼 
-   (.next-button 스타일을 재사용하므로 CSS 추가 불필요) 
+/* 3. "기사 스크랩하기" 버튼
+   (.next-button 스타일을 재사용하므로 CSS 추가 불필요)
 */
 
 /* ----- 19. (추가) 아카이브-팔로잉 탭 스타일 ----- */
@@ -1319,10 +1342,10 @@ body.with-fixed-nav {
     border: none;
     background: none;
     outline: none;
-    
+
     font-size: 16px;
     color: #333;
-    
+
     margin: 0 10px; /* 아이콘과의 여백 */
 }
 .search-bar input::placeholder {
@@ -1475,13 +1498,13 @@ body.with-fixed-nav {
     display: block;
     width: calc(100% + 32px); /* 카드 패딩 벗어나게 */
     margin: 0 -16px; /* 카드 양쪽 끝까지 */
-    
+
     padding: 16px;
-    background-color: #620B95; 
-    color: #FFFFFF;            
+    background-color: #620B95;
+    color: #FFFFFF;
     border: none;
     border-radius: 0 0 16px 16px; /* 카드 하단 모서리만 둥글게 */
-    
+
     font-size: 18px;
     font-weight: 700;
     text-align: center;
@@ -1493,7 +1516,7 @@ body.with-fixed-nav {
 
 .discussion-choice-card {
     /* (재사용) 7% 검은색 배경 */
-    background-color: rgba(0, 0, 0, 0.07); 
+    background-color: rgba(0, 0, 0, 0.07);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px; /* 카드 사이 간격 */
@@ -1518,13 +1541,13 @@ body.with-fixed-nav {
 .entry-button {
     display: block; /* 가로 100% */
     width: 100%;
-    
+
     padding: 16px;
     background-color: #620B95; /* 포인트 보라색 */
-    color: #FFFFFF;            
+    color: #FFFFFF;
     border: none;
     border-radius: 12px;
-    
+
     font-size: 18px;
     font-weight: 700;
     text-align: center;
@@ -1540,10 +1563,10 @@ body.with-fixed-nav {
 
 /* 0. 하단 2중 고정 바를 위한 body 패딩 (수정) */
 body.with-fixed-comment-bar {
-    /* 하단 네비(70px) + 댓글 입력창(60px) + 여백(10px) 
-      = 약 140px의 하단 여백 필요 
+    /* 하단 네비(70px) + 댓글 입력창(60px) + 여백(10px)
+      = 약 140px의 하단 여백 필요
     */
-    padding-bottom: 140px !important; 
+    padding-bottom: 140px !important;
 }
 
 /* (NEW) 토론방 기사 헤더 스타일 */
@@ -1602,6 +1625,7 @@ body.with-fixed-comment-bar {
     align-items: center;
     gap: 4px;
 }
+
 
 /* 1. 기사 헤더 링크 */
 .article-header-link {
@@ -1684,6 +1708,13 @@ body.with-fixed-comment-bar {
     font-weight: 700;
     color: #333;
 }
+/* 🌟 실명방 닉네임 링크 - 밑줄 제거 */
+.comment-user-link {
+    text-decoration: none;
+}
+.comment-user-link:hover .comment-user {
+    text-decoration: underline; /* 마우스 올렸을 때만 살짝 표시 (선택사항) */
+}
 .comment-date {
     font-size: 12px;
     color: #999;
@@ -1737,17 +1768,17 @@ body.with-fixed-comment-bar {
 /* 5. (핵심) 하단 고정 댓글 입력창 */
 .comment-input-bar {
     position: fixed;
-    bottom: 70px; /* (중요) 하단 네비(70px) 바로 위에 위치 */
+    bottom: var(--bottom-nav-height); /* 네비게이션 높이와 정확히 일치 */
     left: 0;
     width: 100%;
-    
+
     display: flex;
     align-items: center;
     gap: 10px;
-    
+
     padding: 10px 16px;
-    background-color: #FFFFFF; /* 흰색 배경 */
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* 위쪽 그림자 */
+    background-color: #FFFFFF;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
     z-index: 100;
 }
 .comment-input-bar .card-avatar-small {
@@ -1757,6 +1788,7 @@ body.with-fixed-comment-bar {
 }
 .comment-input-bar input[type="text"] {
     flex: 1;
+    min-width: 0;
     padding: 10px 15px;
     border: none;
     background-color: rgba(0, 0, 0, 0.07); /* 7% 검은색 */
@@ -1773,13 +1805,24 @@ body.with-fixed-comment-bar {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
-
+.comment-input-bar .cancel-reply-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+    cursor: pointer;
+}
 /* ----- (22-1. 추가) 익명 토론방 아바타 스타일 ----- */
 
 .comment-avatar.anonymous-placeholder {
     background-color: #E0E0E0; /* 피그마의 회색 원 */
-    /* img 태그 대신 div이므로, 기존 .comment-avatar의 
+    /* img 태그 대신 div이므로, 기존 .comment-avatar의
        width/height/border-radius가 적용됨 */
 }
 
@@ -1793,7 +1836,7 @@ body.with-fixed-comment-bar {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 20px;
     border-radius: 16px;
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
 }
 /* .profile-avatar, .profile-info 등은 (CSS 블록 11번)에서 재사용 */
 
@@ -1806,7 +1849,7 @@ body.with-fixed-comment-bar {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
     /* (기본) 보라색 (Not Followed) */
     background-color: #620B95;
     color: #FFFFFF;
@@ -1832,18 +1875,18 @@ body.with-fixed-comment-bar {
 
 /* ----- 24. (추가) 스플래시 화면 스타일 ----- */
 
-/* (중요) 스플래시 화면은 상/하단 바가 없으므로 
-   기본 body 배경색(F9F4E7)을 덮어씁니다. 
+/* (중요) 스플래시 화면은 상/하단 바가 없으므로
+   기본 body 배경색(F9F4E7)을 덮어씁니다.
 */
 body.splash-body {
     background-color: #F9F4E7; /* 기본 배경 */
-    
+
     /* (NEW) 스플래시 배경 이미지 */
     /*  */
-    background-image: url('/overnew_prj/static/image/splash-bg.png'); 
+    background-image: url('/overnew_prj/static/image/splash-bg.png');
     background-size: cover;
     background-position: center center;
-    
+
     /* body.with-fixed-nav의 패딩을 덮어씀 */
     padding-top: 0;
     padding-bottom: 0;
@@ -1855,7 +1898,7 @@ body.splash-body {
     justify-content: center;
     height: 100vh; /* 화면 전체 높이 */
     width: 100%;
-    
+
     /* (선택) 배경 이미지가 너무 튀지 않게 살짝 덮어줌 */
     background-color: rgba(249, 244, 231, 0.5); /* 50% 투명한 베이지 */
 }
@@ -1865,9 +1908,9 @@ h1.splash-logo {
     /* .logo의 기본 보라색(#620B95)을 상속받음 */
     font-size: 48px; /* 폰트 크기 크게 */
     font-weight: 800;
-    
+
     /* (선택) 텍스트에 살짝 그림자 */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* ----- 25. (추가) 이미지 에러 처리 ----- */
@@ -1959,7 +2002,7 @@ img {
     justify-content: center;
     height: 100vh; /* 화면 전체 높이 */
     width: 100%;
-    
+
     /* (선택) 배경 이미지가 너무 튀지 않게 살짝 덮어줌 */
     background-color: rgba(249, 244, 231, 0.5); /* 50% 투명한 베이지 */
 }
@@ -1969,15 +2012,15 @@ h1.splash-logo {
     /* .logo의 기본 보라색(#620B95)을 상속받음 */
     font-size: 48px; /* 폰트 크기 크게 */
     font-weight: 800;
-    
+
     /* (선택) 텍스트에 살짝 그림자 */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 /* 탭 전체 컨테이너 스타일 */
 .view-toggle {
     display: flex;
     /* 이미지와 유사한 연한 회색 배경 */
-    background-color: #e5e5e5; 
+    background-color: #e5e5e5;
     border-radius: 30px; /* 둥근 모서리 */
     padding: 5px; /* 내부 여백 (탭들 사이에 간격이 생김) */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* 은은한 그림자 효과 */
@@ -2008,8 +2051,8 @@ h1.splash-logo {
     background-color: white;
     color: black; /* 텍스트는 진한 색 */
     /* 활성 탭이 그림자 효과를 가지도록 설정 (선택 효과 강조) */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
 }
 /* style.css 파일에 추가/수정합니다. */
 
@@ -2040,24 +2083,24 @@ h1.splash-logo {
     cursor: pointer;
     border-radius: 10px; /* 둥근 알약 모양 */
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    
+
     /* 비활성 상태 (연한 배경/테두리) */
     background-color: transparent;
     border: 1px solid #DEDEDE; /* 연한 테두리 */
     color: #555555;
-    
+
     /*  첫 번째 이미지처럼 비활성 상태에 연한 배경을 원한다면 */
-    background-color: #F0F0F0; 
+    background-color: #F0F0F0;
     border: none;
 }
 
 /* 활성화(선택)된 키워드 버튼 스타일 */
 .keyword-tag.active {
     /*  첫 번째 이미지처럼 약간 어둡고 톤 다운된 배경 */
-    background-color: #EBEBEB; 
+    background-color: #EBEBEB;
     color: #222222; /* 글자색은 진하게 */
     font-weight: 600;
-    
+
     /* 활성 테두리가 있다면 추가 */
     /* border: 1px solid #AAAAAA; */
 }
@@ -2079,7 +2122,7 @@ h1.splash-logo {
 .notification-item.follow.read {
      background-color: rgba(0, 0, 0, 0.03) !important;} /* 원래 보라색보다 훨씬 연하게 */
 
-     
+
 /* --- 기존 style.css 파일에 추가 --- */
 
 /* 페이지 헤더 (프로필 수정, 설정 페이지 등에서 사용) */
@@ -2136,11 +2179,11 @@ h1.splash-logo {
 /* style.css 파일에 추가 */
 .emoji-img {
     /* 🚨 원하는 크기로 직접 설정 (예시: 80px) */
-    width: 80px; 
+    width: 80px;
     height: 80px;
-    
+
     /* 이미지가 찌그러지지 않도록 비율 유지 (선택 사항) */
-    object-fit: contain; 
+    object-fit: contain;
 }
 
 /* 🚨 이미지를 중앙에 배치하기 위한 컨테이너 스타일 (선택 사항이지만 추천) */
@@ -2154,4 +2197,111 @@ h1.splash-logo {
     width: 24px;       /* 버튼 크기(50px)보다 작게 설정 (예: 24px) */
     height: 24px;      /* 가로와 동일한 크기로 설정 */
     object-fit: contain; /* 이미지가 찌그러지지 않도록 비율 유지 */
+}
+
+/* ----- 알림 페이지 / 종 아이콘 배지 ----- */
+.bell-btn {
+    position: relative;
+}
+.notif-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: #E53935;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+.notif-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+.notif-readall-btn {
+    background: none;
+    border: none;
+    color: #620B95;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.notif-list .notification-item {
+    cursor: pointer;
+}
+/* 안 읽은 알림은 진하게, 읽은 알림은 연하게 (위쪽 !important 규칙들을 덮어씀) */
+.notif-list .notification-item.unread {
+    background-color: rgba(98, 11, 149, 0.12) !important;
+}
+.notif-list .notification-item.read {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+.notif-list .notification-item.read .notif-content {
+    color: #888;
+}
+.notif-empty {
+    text-align: center;
+    color: #888;
+    margin-top: 60px;
+}
+
+/* 알림 페이지: 상단 고정 헤더(.main-header)에 내용이 가려지지 않게 여백 확보 */
+body#page-notifications {
+    padding-top: 60px;
+}
+#page-notifications main.container {
+    padding-top: 20px;
+}
+
+/* ----- 프로필: 팔로워 목록 패널 ----- */
+.profile-followers.clickable {
+    cursor: pointer;
+}
+.followers-panel {
+    margin-bottom: 20px;
+}
+.followers-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+}
+.followers-close-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #888;
+    cursor: pointer;
+}
+.followers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.followers-empty {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin: 20px 0;
+}
+/* 유저 목록 아이템 안의 프로필 링크(아바타 + 닉네임/태그)를 가로로 배치 */
+.user-list-item-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
 }

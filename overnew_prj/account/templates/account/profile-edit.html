@@ -11,7 +11,8 @@
     <script src="{% static 'js/profile-edit.js' %}" defer></script>
 </head>
 
-<body id="page-profile-edit-form">
+<body id="page-profile-edit-form">{{ user_data|json_script:"user-data" }}
+
 
     <header class="page-header">
         <a href="#" class="back-arrow" id="back-to-settings"> &lt; </a>
@@ -47,23 +48,23 @@
                 <label>관심 분야 <span class="subtitle-comment">(복수 선택 가능)</span></label>
                 <div class="topics-toggle">
                     <div class="topic-row">
-                        <input type="checkbox" id="topic-politics" name="topics" value="정치">
+                        <input type="checkbox" id="topic-politics" name="topics" value="politics">
                         <label for="topic-politics">정치</label>
-                        <input type="checkbox" id="topic-economy" name="topics" value="경제">
+                        <input type="checkbox" id="topic-economy" name="topics" value="economy">
                         <label for="topic-economy">경제</label>
-                        <input type="checkbox" id="topic-society" name="topics" value="사회">
+                        <input type="checkbox" id="topic-society" name="topics" value="society">
                         <label for="topic-society">사회</label>
-                        <input type="checkbox" id="topic-culture" name="topics" value="생활/문화">
+                        <input type="checkbox" id="topic-culture" name="topics" value="culture">
                         <label for="topic-culture">생활/문화</label>
                     </div>
                     <div class="topic-row">
-                        <input type="checkbox" id="topic-it" name="topics" value="IT/과학">
+                        <input type="checkbox" id="topic-it" name="topics" value="it">
                         <label for="topic-it">IT/과학</label>
-                        <input type="checkbox" id="topic-world" name="topics" value="세계">
+                        <input type="checkbox" id="topic-world" name="topics" value="world">
                         <label for="topic-world">세계</label>
-                        <input type="checkbox" id="topic-enter" name="topics" value="연예">
+                        <input type="checkbox" id="topic-enter" name="topics" value="entertainment">
                         <label for="topic-enter">연예</label>
-                        <input type="checkbox" id="topic-sport" name="topics" value="스포츠">
+                        <input type="checkbox" id="topic-sport" name="topics" value="sports">
                         <label for="topic-sport">스포츠</label>
                     </div>
                 </div>
@@ -138,7 +139,7 @@
                                 for="media-edaily">이데일리</label>
                             <input type="checkbox" id="media-fnnews" name="media" value="fnnews"><label
                                 for="media-fnnews">파이낸셜뉴스</label>
-                            <input type="checkbox" id="media-hankyung-eco" name="media" value="hankyung-eco"><label
+                            <input type="checkbox" id="media-hankyung-eco" name="media" value="hankyung"><label
                                 for="media-hankyung-eco">한국경제</label>
                             <input type="checkbox" id="media-herald" name="media" value="herald"><label
                                 for="media-herald">헤럴드경제</label>

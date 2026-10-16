@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -8,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-e4+#pg0r7l+wv@j@g#84o9&fg+6p+4q^+a+e1(h4r-b)d6eh1p"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -69,7 +70,7 @@ WSGI_APPLICATION = "overnew_prj.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.environ.get("DJANGO_DB_PATH") or BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -154,5 +155,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # 이메일 백�
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP 서버 주소
 EMAIL_PORT = 587  # SMTP 포트
 EMAIL_USE_TLS = True  # TLS 사용
-EMAIL_HOST_USER = 'saramsaramto@gmail.com'  # 발신자 이메일 주소
-EMAIL_HOST_PASSWORD = 'osez psrz wpjm eear'  # 발신자 이메일 비밀번호
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+
+LOGIN_URL = 'account:login'
+
+# 이메일 인증하는거 개발 중엔 번거로우니 꺼놓은거
+EMAIL_VERIFICATION_REQUIRED = False  # 개발 중엔 False, 배포할 때 True로 변경

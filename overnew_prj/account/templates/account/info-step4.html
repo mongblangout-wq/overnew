@@ -26,10 +26,10 @@
             <div class="progress-value" style="width: 80%;"></div>
         </div>
 
-        <h2 class="title" id="user-greeting">...님</h2>
+        <h2 class="title" id="user-greeting">{{ user_name }}님</h2>
         <h3 class="subtitle">뉴스를 주로 접하는 언론사를<br>모두 체크해주세요.</h3>
 
-        <form class="info-form" method="POST" action="{% url 'account:info_step4_post' %}">
+        <form class="info-form" method="POST" action="{% url 'account:info_step4' %}">
 
             {% csrf_token %}
             <div class="form-group">
@@ -87,7 +87,7 @@
                     <input type="checkbox" id="media-channela" name="media" value="channela">
                     <label for="media-channela">채널A</label>
 
-                    <input type="checkbox" id="media-hankyung" name="media" value="hankyung">
+                    <input type="checkbox" id="media-hankyungtv" name="media" value="hankyungtv">
                     <label for="media-hankyung">한국경제TV</label>
 
                     <input type="checkbox" id="media-jtbc" name="media" value="jtbc">
@@ -268,12 +268,10 @@
                     <label for="media-epa">EPA연합뉴스</label>
                 </div>
             </div>
-
+            <button type="submit" class="next-button" id="next-btn-step4">NEXT</button>
         </form>
 
     </main>
-
-    <button type="submit" class="next-button" id="next-btn-step4">NEXT</button>
 
 </body>
 

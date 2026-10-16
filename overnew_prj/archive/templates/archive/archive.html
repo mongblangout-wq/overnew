@@ -1,35 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>아카이브 - OVERNEW</title>
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body class="with-fixed-nav"> 
+<body class="with-fixed-nav">
+<script type="application/json" id="user-data-json">{"id": {{ current_user_id }}}</script>
 <header class="main-header">
     <button type="button" class="icon-btn menu-btn" id="settings-menu-btn">
-        <img src="../../../static/image/hamburger.png" alt="메뉴" class="header-icon">
+        <img src="{% static 'image/hamburger.png' %}" alt="메뉴" class="header-icon">
     </button>
 
     <h1 class="logo header-logo">OVERNEW</h1>
 
     <button type="button" class="icon-btn bell-btn" id="notifications-btn">
-        <img src="../../../static/image/bell.png" alt="알림" class="header-icon">
+        <img src="{% static 'image/bell.png' %}" alt="알림" style="width: 26px; height: 26px; vertical-align: middle;">
     </button>
 </header>
 
 <!-- 플로팅 버튼 -->
-<a href="create-scrap.html" class="floating-action-button"><span>✎</span></a>
+<a href="{% url 'archive:create_scrap' %}" class="floating-action-button"><span>✎</span></a>
 
 <main class="container">
-    <div class="archive-profile-card">
-        <img src="../../../static/images/avatar-placeholder.png" alt="Profile Avatar" class="profile-avatar">
-        <div class="profile-info">
-            <span class="profile-name" id="user-nickname">...</span>
-            <span class="profile-tags" id="user-tags">...</span>
-            <span class="profile-followers" id="user-followers">...</span>
-        </div>
+    <div class="profile-info">
+    <span class="profile-name" id="user-nickname">{{ current_user_nickname }}</span>
+    <span class="profile-tags" id="user-tags">
+        {% if current_user_topics %}{% for t in current_user_topics %}#{{ t }} {% endfor %}{% else %}#관심분야_없음{% endif %}
+    </span>
+    <span class="profile-followers" id="user-followers">팔로워 : {{ current_user_followers }}명</span>
     </div>
 
     <div class="view-toggle three-tabs">
@@ -72,5 +73,7 @@
 <nav class="bottom-nav"></nav>
 
 <!-- JS 파일 불러오기 -->
-<script src="../../../static/js/nav.js"></script>
-<script src="../../../static/js/archive.js"></script>
+<script src="{% static 'js/nav.js' %}"></script>
+<script src="{% static 'js/archive.js' %}"></script>
+</body>
+</html>

@@ -1,31 +1,28 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>추천 - OVERNEW</title>
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body class="with-fixed-nav">
     <header class="main-header">
         <!-- 햄버거 버튼 -->
         <button type="button" class="icon-btn menu-btn" id="settings-menu-btn">
-            <img src="../../../static/image/hamburger.png" alt="메뉴" class="header-icon">
+            <img src="{% static 'image/hamburger.png' %}" alt="메뉴" class="header-icon">
         </button>
         <h1 class="logo header-logo">OVERNEW</h1>
         <!-- 알람 버튼 -->
         <button type="button" class="icon-btn bell-btn" id="notifications-btn">
-            <img src="../../../static/image/bell.png" alt="알림" style="width: 26px; height: 26px; vertical-align: middle;">
+            <img src="{% static 'image/bell.png' %}" alt="알림" style="width: 26px; height: 26px; vertical-align: middle;">
         </button>
     </header>
 
 <main class="container">
 
-    <!-- <div style="text-align: center; margin-bottom: 15px; font-size: 15px; color: #000000;">
-        나의 관심사: <span id="my-interest-display" style="font-weight: bold; color: #620B95;">...</span>
-    </div> -->
-    
     <div class="view-toggle" style="margin-bottom: 20px;">
         <input type="radio" id="view-similar" name="view-type" value="similar" checked>
         <label for="view-similar">유사한 관심사</label>
@@ -34,15 +31,15 @@
         <label for="view-opposite">반대 관심사</label>
     </div>
 
-    <div class="feed-list" id="feed-similar"></div>
-    <div class="feed-list" id="feed-opposite" style="display: none;"></div>
+    <div class="article-list" id="feed-similar"></div>
+    <div class="article-list" id="feed-opposite" style="display: none;"></div>
 </main>
 
     <!-- nav는 JS에서 생성 -->
     <nav class="bottom-nav"></nav>
 
     <!-- JS 불러오기 -->
-    <script src="../../../static/js/nav.js"></script>
-    <script src="../../../static/js/recommend.js"></script>
+    <script src="{% static 'js/nav.js' %}"></script>
+    <script src="{% static 'js/recommend.js' %}"></script>
 </body>
 </html>

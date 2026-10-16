@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알림 - OVERNEW</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body id="page-notifications">
+
+    <header class="main-header">
+        <button type="button" class="icon-btn back-btn" id="back-button" aria-label="뒤로가기">
+            <span class="back-arrow">&larr;</span>
+        </button>
+        <h1 class="logo header-logo">알림</h1>
+        <div style="width:40px;"></div>
+    </header>
+
+    <main class="container">
+
+        {% if notifications %}
+        <div class="notif-toolbar">
+            <button type="button" class="notif-readall-btn" id="read-all-btn">모두 읽음</button>
+        </div>
+        {% endif %}
+
+        <div class="notif-list" id="notif-list">
+            {% for n in notifications %}
+            <div class="notification-item {{ n.notif_type }} {% if n.is_read %}read{% else %}unread{% endif %}"
+                 data-notif-id="{{ n.id }}"
+                 data-link="{{ n.link }}"
+                 data-time="{{ n.created_at|date:'c' }}">
+                <div class="notif-icon-wrapper">
+                    <span class="notif-icon">
+                        {% if n.notif_type == "follow" %}👤{% elif n.notif_type == "reply" %}💬{% else %}♥{% endif %}
+                    </span>
+                </div>
+                <div class="notif-text-wrapper">
+                    <p class="notif-content">{{ n.text }}</p>
+                    <span class="notif-timestamp"></span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <p class="notif-empty" id="notif-empty" {% if notifications %}style="display:none;"{% endif %}>
+            새로운 알림이 없어요.
+        </p>
+
+    </main>
+
+    <script>
+        function getCSRFToken() {
+            const match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
+
+        function formatTimeAgo(timestamp) {
+            const past = new Date(timestamp);
+            const diff = Math.floor((new Date() - past) / 1000);
+            const MIN = 60, HOUR = MIN * 60, DAY = HOUR * 24, MONTH = DAY * 30;
+            if (diff < MIN) return '방금 전';
+            if (diff < HOUR) return `${Math.floor(diff / MIN)}분 전`;
+            if (diff < DAY) return `${Math.floor(diff / HOUR)}시간 전`;
+            if (diff < MONTH) return `${Math.floor(diff / DAY)}일 전`;
+            const y = String(past.getFullYear()).slice(-2);
+            const m = String(past.getMonth() + 1).padStart(2, '0');
+            const d = String(past.getDate()).padStart(2, '0');
+            return `${y}/${m}/${d}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 뒤로가기
+            document.getElementById('back-button').addEventListener('click', () => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/feed/';
+                }
+            });
+
+            // "n분 전" 표시
+            document.querySelectorAll('.notification-item').forEach(item => {
+                const t = item.querySelector('.notif-timestamp');
+                if (t) t.textContent = formatTimeAgo(item.dataset.time);
+            });
+
+            // 알림 클릭 → 읽음 처리 후 해당 페이지로 이동
+            document.getElementById('notif-list').addEventListener('click', async (e) => {
+                const item = e.target.closest('.notification-item');
+                if (!item) return;
+
+                const link = item.dataset.link;
+                try {
+                    await fetch(`/account/api/notifications/${item.dataset.notifId}/read/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCSRFToken() },
+                    });
+                } catch (err) {
+                    console.error('읽음 처리 실패:', err);
+                }
+                item.classList.remove('unread');
+                item.classList.add('read');
+                if (link) window.location.href = link;
+            });
+
+            // 모두 읽음
+            const readAllBtn = document.getElementById('read-all-btn');
+            if (readAllBtn) {
+                readAllBtn.addEventListener('click', async () => {
+                    try {
+                        await fetch('/account/api/notifications/read-all/', {
+                            method: 'POST',
+                            headers: { 'X-CSRFToken': getCSRFToken() },
+                        });
+                        document.querySelectorAll('.notification-item.unread').forEach(el => {
+                            el.classList.remove('unread');
+                            el.classList.add('read');
+                        });
+                    } catch (err) {
+                        console.error('모두 읽음 실패:', err);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

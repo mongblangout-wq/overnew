@@ -1,124 +1,91 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ----------------------------------------------------
-    // 1. DOM 요소 가져오기
-    // ----------------------------------------------------
     const backButton = document.getElementById('back-to-settings');
     const saveButton = document.getElementById('save-profile-btn');
-
-    // 프로필 필드
     const nicknameInput = document.getElementById('profile-nickname-input');
     const ageInput = document.getElementById('profile-age-input');
-
-    // 체크박스 그룹
     const topicCheckboxes = document.querySelectorAll('input[name="topics"]');
     const mediaCheckboxes = document.querySelectorAll('input[name="media"]');
 
+    const userDataEl = document.getElementById('user-data');
+    const userInfo = userDataEl ? JSON.parse(userDataEl.textContent) : {};
 
-    // ----------------------------------------------------
-    // 2. 로그인 확인 및 데이터 로드 (초기 진입점)
-    // ----------------------------------------------------
-    let userInfo = JSON.parse(localStorage.getItem('user-info') || 'null');
-
-    // 로그인 정보 없을 경우 리다이렉션
-    if (!userInfo) {
-        alert('로그인 정보가 없습니다. 로그인 페이지로 이동합니다.');
-        // profile-edit.html이 account/templates/account/에 있으므로
-        window.location.href = '/account/login/';
-        return;
+    function getCSRFToken() {
+        const match = document.cookie.match(/csrftoken=([^;]+)/);
+        return match ? match[1] : '';
     }
 
-    // ----------------------------------------------------
-    // 3. 폼에 데이터 채우기 (로드 로직)
-    // ----------------------------------------------------
     function loadProfileDataIntoForm() {
         if (nicknameInput) nicknameInput.value = userInfo.nickname || '';
         if (ageInput) ageInput.value = userInfo.age || '';
 
-        // 성별 채우기 (Radio)
         const genderRadios = document.querySelectorAll('input[name="gender-selection"]');
-        if (genderRadios && userInfo.gender) {
+        if (userInfo.gender) {
             genderRadios.forEach(radio => {
-                if (radio.value === userInfo.gender) {
-                    radio.checked = true;
-                }
+                if (radio.value === userInfo.gender) radio.checked = true;
             });
         }
 
-        // 관심 분야 채우기 (Topics Checkboxes)
-        if (topicCheckboxes && userInfo.topics && Array.isArray(userInfo.topics)) {
+        if (Array.isArray(userInfo.topics)) {
             topicCheckboxes.forEach(checkbox => {
-                if (userInfo.topics.includes(checkbox.value)) {
-                    checkbox.checked = true;
-                }
+                if (userInfo.topics.includes(checkbox.value)) checkbox.checked = true;
             });
         }
 
-        // 🚨 선호 언론사 채우기 (Media Checkboxes)
-        if (mediaCheckboxes && userInfo.media && Array.isArray(userInfo.media)) {
+        if (Array.isArray(userInfo.media)) {
             mediaCheckboxes.forEach(checkbox => {
-                if (userInfo.media.includes(checkbox.value)) {
-                    checkbox.checked = true;
-                }
+                if (userInfo.media.includes(checkbox.value)) checkbox.checked = true;
             });
         }
     }
 
-    // ----------------------------------------------------
-    // 4. 프로필 정보 저장 함수 (저장 로직)
-    // ----------------------------------------------------
-    function saveProfileData() {
-        // 닉네임, 나이 업데이트
-        userInfo.nickname = nicknameInput.value.trim();
-        userInfo.age = ageInput.value.trim();
-
-        // 성별 업데이트 (Radio)
+    async function saveProfileData() {
         const selectedGender = document.querySelector('input[name="gender-selection"]:checked');
-        userInfo.gender = selectedGender ? selectedGender.value : '';
+        const updatedTopics = Array.from(topicCheckboxes).filter(c => c.checked).map(c => c.value);
+        const updatedMedia = Array.from(mediaCheckboxes).filter(c => c.checked).map(c => c.value);
 
-        // 관심 분야 업데이트 (Topics Checkboxes)
-        const updatedTopics = [];
-        topicCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                updatedTopics.push(checkbox.value);
+        const payload = {
+            nickname: nicknameInput.value.trim(),
+            age: ageInput.value.trim(),
+            gender: selectedGender ? selectedGender.value : '',
+            topics: updatedTopics,
+            media: updatedMedia,
+        };
+
+        try {
+            const response = await fetch('/account/api/profile/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+
+            if (data.ok) {
+                alert('프로필이 성공적으로 수정되었습니다!');
+                window.location.replace('/account/settings/');
+            } else {
+                alert('저장 실패: ' + (data.error || '알 수 없는 서버 오류'));
             }
-        });
-        userInfo.topics = updatedTopics;
-
-        // 🚨 선호 언론사 업데이트 (Media Checkboxes)
-        const updatedMedia = [];
-        mediaCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                updatedMedia.push(checkbox.value);
-            }
-        });
-        userInfo.media = updatedMedia;
-
-        // 로컬 스토리지에 업데이트된 정보 저장 및 반영 완료
-        localStorage.setItem('user-info', JSON.stringify(userInfo));
-
-        alert('프로필이 성공적으로 수정되었습니다!');
-
-        // 🚨 저장 후 페이지 이동: replace()를 사용하여 뒤로가기 지옥 방지
-        window.location.replace('settings-logged-in.html');
+        } catch (error) {
+            console.error('API 요청 오류:', error);
+            alert('네트워크 연결 오류 또는 서버 문제.');
+        }
     }
 
-    // ----------------------------------------------------
-    // 5. 이벤트 리스너 연결
-    // ----------------------------------------------------
+    if (saveButton) saveButton.addEventListener('click', saveProfileData);
 
-    // 저장 버튼 클릭 이벤트 연결
-    if (saveButton) {
-        saveButton.addEventListener('click', saveProfileData);
-    }
-
-    // 뒤로가기 버튼 처리 (settings-logged-in.html로 명시적 복귀)
     if (backButton) {
         backButton.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = 'settings-logged-in.html';
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/account/settings/';
+            }
         });
     }
 
-    // 페이지 로드 시 프로필 데이터 불러오기
     loadProfileDataIntoForm();
 });

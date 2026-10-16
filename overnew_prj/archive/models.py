@@ -51,25 +51,24 @@ class UserMedia(models.Model):
 class Article(models.Model):
     article_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
-    news_content = models.TextField(blank=True) 
+    news_content = models.TextField(blank=True)
     image = models.URLField(blank=True)
-    
-    # 🌟 ArchiveCategory로 참조
+    view_count = models.PositiveIntegerField(default=0)   # ← 추가
+
     nc = models.ForeignKey(
         ArchiveCategory,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='archive_articles_by_cat' # related_name 충돌 방지
+        related_name='archive_articles_by_cat'
     )
-    # 🌟 ArchiveMedia로 참조
     media = models.ForeignKey(
         ArchiveMedia,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='archive_articles_by_media' # related_name 충돌 방지
+        related_name='archive_articles_by_media'
     )
-    url = models.URLField(unique=True) 
-    summary = models.TextField(blank=True) 
+    url = models.URLField(unique=True)
+    summary = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -85,6 +84,7 @@ class Scrap(models.Model):
     class Meta:
         unique_together = ('user', 'news')
 
+
 class Like(models.Model):
     """유저가 기사에 '좋아요'를 누르는 것을 기록하는 모델"""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -97,6 +97,23 @@ class Like(models.Model):
 
     def __str__(self):
         return f"{self.user.username} likes {self.news.title[:20]}..."
+
+
+# 🌟 [신규 추가] 북마크 모델 (스크랩과는 별개로, 상세페이지 북마크 버튼용)
+class Bookmark(models.Model):
+    """유저가 기사 상세페이지에서 '북마크' 버튼을 눌러 저장하는 것을 기록하는 모델"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookmarks')
+    news = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='bookmarks')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'news')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} bookmarked {self.news.title[:20]}..."
+
+
 # 🚨 NameError 해결 (User -> settings.AUTH_USER_MODEL)
 class Discussion(models.Model):
     news = models.ForeignKey(Article, on_delete=models.CASCADE)

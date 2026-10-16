@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토론 입장 - OVERNEW</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="with-fixed-nav">
+<header class="main-header">
+    <button type="button" class="icon-btn menu-btn" onclick="history.back()"><span>&lt;</span></button>
+    <h1 class="logo header-logo">OVERNEW</h1>
+    <div style="width:40px;"></div>
+</header>
+
+<main class="container">
+    <h2 style="margin-bottom:20px;">{{ article.title }}</h2>
+
+    <div class="discussion-choice-card">
+        <h3 class="card-title">실명 토의방</h3>
+        <p class="card-description">신뢰와 소통이 중심이 되는 실명 토론방입니다. 프로필이 공개되어 더 책임감 있는 대화를 경험할 수 있어요.</p>
+        <a href="{% url 'discussion:room_detail' article.article_id 'real' %}" class="entry-button">입장하기</a>
+    </div>
+
+    <div class="discussion-choice-card">
+        <h3 class="card-title">익명 토의방</h3>
+        <p class="card-description">자유롭게 의견을 나누는 익명 토론 공간입니다. 본인의 정보 노출 걱정 없이 이야기하세요.</p>
+        <a href="{% url 'discussion:room_detail' article.article_id 'anonymous' %}" class="entry-button">입장하기</a>
+    </div>
+</main>
+
+<nav class="bottom-nav">
+    <a href="{% url 'feed:feed' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">◆</span></div>
+        <span class="nav-label">피드</span>
+    </a>
+    <a href="{% url 'archive:home' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">●</span></div>
+        <span class="nav-label">아카이브</span>
+    </a>
+    <a href="{% url 'recommend:main' %}" class="nav-item">
+        <div class="nav-icon-wrapper"><span class="nav-icon">▲</span></div>
+        <span class="nav-label">추천</span>
+    </a>
+    <a href="{% url 'discussion:community' %}" class="nav-item active">
+        <div class="nav-icon-wrapper"><span class="nav-icon">◐</span></div>
+        <span class="nav-label">커뮤니티</span>
+    </a>
+</nav>
+</body>
+</html>

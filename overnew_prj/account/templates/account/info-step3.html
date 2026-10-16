@@ -26,12 +26,12 @@
             <div class="progress-value" style="width: 60%;"></div>
         </div>
 
-        <h2 class="title" id="user-greeting">...님</h2>
+        <h2 class="title" id="user-greeting">{{ user_name }}님</h2>
         <h3 class="subtitle">어떤 분야의 뉴스를<br>주로 보시나요?
             <span class="subtitle-comment">(복수 선택 가능)</span>
         </h3>
 
-        <form class="info-form" method="POST" action="{% url 'account:info_step3_post' %}">
+        <form class="info-form" method="POST" action="{% url 'account:info_step3' %}">
 
             {% csrf_token %}
 

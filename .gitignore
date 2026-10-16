@@ -181,3 +181,7 @@ cython_debug/
 
 # google cloud vision
 service_account.json
+# CI / test
+.idea/
+ci_test.sqlite3
+newman-report.html

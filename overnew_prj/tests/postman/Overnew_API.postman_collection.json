@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "1cc06490-7e54-49fe-beba-c6511ec3dd16",
+    "name": "Overnew API",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58810402",
+    "_collection_link": "https://go.postman.co/collection/58810402-1cc06490-7e54-49fe-beba-c6511ec3dd16?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Setup",
+      "item": [
+        {
+          "name": "Logout - 세션 초기화",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"로그아웃 처리 후 응답을 받음\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 404]);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/logout/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "logout",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "Hot feed - 200/JSON/응답시간",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"JSON 응답\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"응답 시간 1초 미만\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"articles가 배열이고 1개 이상\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.articles).to.be.an(\"array\");\r\n    pm.expect(body.articles.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"모든 기사에 필수 필드가 있음\", function () {\r\n    const articles = pm.response.json().articles;\r\n    articles.forEach(function (a) {\r\n        pm.expect(a).to.include.all.keys(\r\n            \"id\", \"category\", \"source\", \"title\",\r\n            \"views\", \"likes\", \"time\", \"image\"\r\n        );\r\n    });\r\n});\r\n\r\npm.test(\"필드 타입이 올바름\", function () {\r\n    const articles = pm.response.json().articles;\r\n    articles.forEach(function (a) {\r\n        pm.expect(a.id).to.be.a(\"number\");\r\n        pm.expect(a.title).to.be.a(\"string\").and.not.empty;\r\n        pm.expect(a.views).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.likes).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.image).to.be.a(\"string\");\r\n    });\r\n});\r\n\r\npm.test(\"time이 YYYY-MM-DD HH:MM 형식\", function () {\r\n    const articles = pm.response.json().articles;\r\n    articles.forEach(function (a) {\r\n        pm.expect(a.time).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$/);\r\n    });\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/api/hot/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "api",
+                "hot",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommend",
+      "item": [
+        {
+          "name": "Recommend articles - 비로그인(requires_login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"JSON 응답\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"응답 시간 1초 미만\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"비로그인: requires_login이 true\", function () {\r\n    pm.expect(pm.response.json().requires_login).to.eql(true);\r\n});\r\n\r\npm.test(\"비로그인: articles가 빈 배열\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.articles).to.be.an(\"array\").that.is.empty;\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jar = pm.cookies.jar();\r\njar.clear(pm.environment.get(\"base_url\"), function (err) {\r\n    if (err) { console.log(\"쿠키 삭제 실패:\", err); }\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend/api/articles/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend",
+                "api",
+                "articles",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend users - 존재하지 않는 topic(404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"존재하지 않는 카테고리는 404\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\npm.test(\"JSON 응답\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"에러 메시지에 요청한 카테고리 코드 포함\", function () {\r\n    pm.expect(pm.response.json().error).to.include(\"no_such_topic\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend/api/recommend/?topic=no_such_topic",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend",
+                "api",
+                "recommend",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "topic",
+                  "value": "no_such_topic"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Unauthenticated",
+      "item": [
+        {
+          "name": "Unread count - 비로그인(0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"비로그인이면 count가 0\", function () {\r\n    pm.expect(pm.response.json().count).to.eql(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/notifications/unread-count/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "notifications",
+                "unread-count",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Profile edit - 비로그인 접근(302)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"비로그인은 로그인 페이지로 리다이렉트(302)\", function () {\r\n    pm.response.to.have.status(302);\r\n});\r\n\r\npm.test(\"이동 주소가 로그인 페이지\", function () {\r\n    pm.expect(pm.response.headers.get(\"Location\")).to.include(\"/account/login/\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/profile/edit/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "profile",
+                "edit",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Login - 빈 값(400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"빈 값은 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"ok가 false이고 error 메시지 존재\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.ok).to.eql(false);\r\n    pm.expect(body.error).to.be.a(\"string\").and.not.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"\",\r\n    \"password\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/login/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - 잘못된 비밀번호(401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"잘못된 비밀번호는 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"ok가 false이고 error 메시지 존재\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.ok).to.eql(false);\r\n    pm.expect(body.error).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"로그인 세션이 생기지 않음\", function () {\r\n    pm.expect(pm.cookies.has(\"sessionid\")).to.eql(false);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"{{test_username}}\",\r\n    \"password\": \"wrong-password-for-test\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/login/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - 정상 로그인(200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"정상 로그인은 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"ok가 true이고 사용자 정보 반환\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.ok).to.eql(true);\r\n    pm.expect(body.user.username).to.eql(pm.environment.get(\"test_username\"));\r\n    pm.expect(body.user.nickname).to.be.a(\"string\");\r\n});\r\n\r\npm.test(\"세션 쿠키 발급\", function () {\r\n    pm.expect(pm.cookies.has(\"sessionid\")).to.eql(true);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"{{test_username}}\",\r\n    \"password\": \"{{test_password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/login/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - GET 요청(405)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"허용되지 않는 메서드는 405\", function () {\r\n    pm.response.to.have.status(405);\r\n});\r\n\r\npm.test(\"Allow 헤더에 POST 포함\", function () {\r\n    pm.expect(pm.response.headers.get(\"Allow\")).to.include(\"POST\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/login/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - 잘못된 JSON(400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"JSON이 아니면 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"ok가 false이고 error 메시지 존재\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.ok).to.eql(false);\r\n    pm.expect(body.error).to.be.a(\"string\").and.not.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "this is not json",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/login/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send email code - 빈 이메일(400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"이메일이 비면 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"ok가 false이고 error 메시지 존재\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.ok).to.eql(false);\r\n    pm.expect(body.error).to.be.a(\"string\").and.not.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/account/api/send-email-code/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "send-email-code",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authenticated",
+      "item": [
+        {
+          "name": "Recommend articles - 로그인",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"JSON 응답\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"응답 시간 1초 미만\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"로그인 상태: requires_login이 false\", function () {\r\n    pm.expect(pm.response.json().requires_login).to.eql(false);\r\n});\r\n\r\npm.test(\"articles가 배열이고 1개 이상\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.articles).to.be.an(\"array\");\r\n    pm.expect(body.articles.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"모든 기사에 필수 필드가 있음\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a).to.include.all.keys(\r\n            \"id\", \"category\", \"source\", \"title\",\r\n            \"views\", \"likes\", \"time\", \"image\"\r\n        );\r\n    });\r\n});\r\n\r\npm.test(\"필드 타입이 올바름\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a.id).to.be.a(\"number\");\r\n        pm.expect(a.title).to.be.a(\"string\").and.not.empty;\r\n        pm.expect(a.views).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.likes).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.image).to.be.a(\"string\");\r\n    });\r\n});\r\n\r\npm.test(\"최신순 정렬(time 내림차순)\", function () {\r\n    const times = pm.response.json().articles.map(function (a) { return a.time; });\r\n    const sorted = times.slice().sort().reverse();\r\n    pm.expect(times).to.eql(sorted);\r\n});\r\n\r\npm.test(\"최대 30개\", function () {\r\n    pm.expect(pm.response.json().articles.length).to.be.at.most(30);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend/api/articles/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend",
+                "api",
+                "articles",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend articles - 로그인(opposite)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"JSON 응답\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"응답 시간 1초 미만\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"로그인 상태: requires_login이 false\", function () {\r\n    pm.expect(pm.response.json().requires_login).to.eql(false);\r\n});\r\n\r\npm.test(\"articles가 배열이고 1개 이상\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.articles).to.be.an(\"array\");\r\n    pm.expect(body.articles.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"모든 기사에 필수 필드가 있음\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a).to.include.all.keys(\r\n            \"id\", \"category\", \"source\", \"title\",\r\n            \"views\", \"likes\", \"time\", \"image\"\r\n        );\r\n    });\r\n});\r\n\r\npm.test(\"필드 타입이 올바름\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a.id).to.be.a(\"number\");\r\n        pm.expect(a.title).to.be.a(\"string\").and.not.empty;\r\n        pm.expect(a.views).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.likes).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(a.image).to.be.a(\"string\");\r\n    });\r\n});\r\n\r\npm.test(\"최신순 정렬(time 내림차순)\", function () {\r\n    const times = pm.response.json().articles.map(function (a) { return a.time; });\r\n    const sorted = times.slice().sort().reverse();\r\n    pm.expect(times).to.eql(sorted);\r\n});\r\n\r\npm.test(\"최대 30개\", function () {\r\n    pm.expect(pm.response.json().articles.length).to.be.at.most(30);\r\n});\r\n\r\npm.test(\"opposite: 응답 카테고리가 비어 있지 않음\", function () {\r\n    pm.response.json().articles.forEach(function (a) {\r\n        pm.expect(a.category).to.be.a(\"string\").and.not.empty;\r\n    });\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend/api/articles/?type=opposite",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend",
+                "api",
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "opposite"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unread count - 로그인(숫자)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"상태 코드 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"count가 0 이상의 정수\", function () {\r\n    const count = pm.response.json().count;\r\n    pm.expect(count).to.be.a(\"number\");\r\n    pm.expect(Number.isInteger(count)).to.eql(true);\r\n    pm.expect(count).to.be.at.least(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/api/notifications/unread-count/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "api",
+                "notifications",
+                "unread-count",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

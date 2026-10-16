@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커뮤니티 - OVERNEW</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="with-fixed-nav">
+<header class="main-header">
+    <button type="button" class="icon-btn menu-btn" id="settings-menu-btn">
+        <img src="{% static 'image/hamburger.png' %}" alt="메뉴" class="header-icon">
+    </button>
+    <h1 class="logo header-logo">OVERNEW</h1>
+    <button type="button" class="icon-btn bell-btn" id="notifications-btn">
+        <img src="{% static 'image/bell.png' %}" alt="알림" style="width: 26px; height: 26px; vertical-align: middle;">
+    </button>
+</header>
+
+<main class="container">
+    <div class="keyword-list" id="keyword-list">
+        <span class="keyword-tag active" data-topic="politics">정치</span>
+        <span class="keyword-tag" data-topic="economy">경제</span>
+        <span class="keyword-tag" data-topic="society">사회</span>
+        <span class="keyword-tag" data-topic="culture">생활/문화</span>
+        <span class="keyword-tag" data-topic="it">IT/과학</span>
+        <span class="keyword-tag" data-topic="world">세계</span>
+    </div>
+
+    <div class="discussion-feed" id="discussion-feed">
+        {% for article in articles %}
+        <div class="discussion-card" data-category="{{ article.nc.news_category|default:'' }}">
+            <span class="card-category topic-{{ article.nc.news_category|default:'default' }}">{{ article.nc.news_category }}</span>
+            <h3 class="card-title">{{ article.title }}</h3>
+            {% if article.image %}
+            <img src="{{ article.image }}" alt="{{ article.title }}" class="discussion-card-image">
+            {% endif %}
+            <div class="discussion-card-meta">
+                <span class="time-left">토론 진행중</span>
+            </div>
+            <div class="discussion-card-footer">
+                <div class="discussion-stats">
+                    <span>{{ article.likes.count }} 좋아요</span>
+                </div>
+            </div>
+            <a href="{% url 'discussion:room_select' article.article_id %}" class="discussion-join-btn">토론 참여하기</a>
+        </div>
+        {% empty %}
+        <p>아직 등록된 기사가 없습니다.</p>
+        {% endfor %}
+    </div>
+</main>
+
+<nav class="bottom-nav"></nav>
+<script src="{% static 'js/nav.js' %}"></script>
+<script src="{% static 'js/discussion_list.js' %}"></script>
+
+</body>
+</html>

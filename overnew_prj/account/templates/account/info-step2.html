@@ -26,11 +26,10 @@
             <div class="progress-value" style="width: 40%;"></div>
         </div>
 
-        <h2 class="title" id="user-greeting">...님</h2>
+        <h2 class="title" id="user-greeting">{{ user_name }}님</h2>
         <h3 class="subtitle">평소 어떤 정치적 입장에<br>가까우신가요?</h3>
 
-        <form class="info-form" method="POST" action="{% url 'account:info_step2_post' %}">
-
+        <form class="info-form" method="POST" action="{% url 'account:info_step2' %}">
             {% csrf_token %}
 
             <div class="form-group">
@@ -49,13 +48,12 @@
                 </div>
             </div>
 
+            <button type="submit" class="next-button" id="next-btn-step2">NEXT</button>
 
         </form>
 
-
     </main>
 
-    <button type="submit" class="next-button" id="next-btn-step2">NEXT</button>
 </body>
 
 </html>

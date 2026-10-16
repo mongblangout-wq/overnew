@@ -1,26 +1,54 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 - OVERNEW</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body class="with-fixed-nav">
+<script type="application/json" id="profile-data-json">
+{
+    "myUserId": {{ current_user_id }},
+    "targetUserId": {{ target_user_id }},
+    "targetNickname": "{{ target_nickname|escapejs }}",
+    "targetTopics": {{ target_topics_json|safe }},
+    "targetFollowers": {{ target_followers }},
+    "isFollowing": {{ is_following|yesno:"true,false" }}
+}
+</script>
     <header class="main-header">
-        <a href="settings-logged-in.html" class="icon-btn menu-btn"><span>☰</span></a>
+        <button type="button" class="icon-btn back-btn" id="back-button" aria-label="뒤로가기">
+            <span class="back-arrow">&larr;</span>
+        </button>
         <h1 class="logo header-logo">OVERNEW</h1>
-        <a href="notifications.html" class="icon-btn bell-btn"><span>🔔</span></a>
+        <a href="/account/notifications/" class="icon-btn bell-btn" id="notifications-btn">
+            <img src="{% static 'image/bell.png' %}" alt="알림" class="header-icon">
+        </a>
     </header>
 
     <main class="container" style="padding-top: 20px;">
         <div class="archive-profile-card profile-detail-card">
-            <img src="avatar-placeholder.png" alt="Profile Avatar" class="profile-avatar" id="profile-avatar">
+            <img src="{% static 'image/avatar-placeholder.png' %}" alt="Profile Avatar" class="profile-avatar" id="profile-avatar">
             <div class="profile-info">
                 <span class="profile-name" id="profile-nickname">...</span>
                 <span class="profile-tags" id="profile-tags">...</span>
                 <span class="profile-followers" id="profile-followers">...</span>
             </div>
-            <button class="profile-follow-btn" id="profile-follow-btn" data-userid="">
-                팔로우
+            <button class="profile-follow-btn" id="profile-follow-btn" data-userid="{{ target_user_id }}">
+                {% if is_following %}언팔로우{% else %}팔로우{% endif %}
             </button>
+        </div>
+
+        <!-- 팔로워 목록 (프로필 카드의 "팔로워: N명"을 누르면 펼쳐짐) -->
+        <div class="followers-panel" id="followers-panel" style="display: none;">
+            <div class="followers-panel-header">
+                <span>팔로워</span>
+                <button type="button" class="followers-close-btn" id="followers-close-btn" aria-label="닫기">✕</button>
+            </div>
+            <div class="followers-list" id="followers-list"></div>
         </div>
 
         <div class="view-toggle">
@@ -50,7 +78,7 @@
     </main>
 
     <nav class="bottom-nav">
-        <a href="{% url 'feed' %}" class="nav-item active">
+        <a href="{% url 'feed:feed' %}" class="nav-item active">
             <div class="nav-icon-wrapper"><span class="nav-icon">◆</span></div>
             <span class="nav-label">피드</span>
         </a>
@@ -69,6 +97,7 @@
     </nav>
 
     <!-- JS 분리 -->
+    <script src="{% static 'js/nav.js' %}"></script>
     <script src="{% static 'js/archive.js' %}"></script>
 </body>
 
